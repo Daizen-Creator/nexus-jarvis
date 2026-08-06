@@ -126,10 +126,11 @@ const pipInstall = (onLog: (line: string) => void): Promise<{ ok: boolean; messa
 /** Tenta iniciar o servidor do Ollama a partir de locais conhecidos. */
 const startOllama = (onLog: (line: string) => void): Promise<{ ok: boolean; message: string }> =>
   new Promise((resolve) => {
+    // Locais padrão do Ollama em qualquer Windows — nada específico de máquina.
     const candidates = [
-      'ollama',
+      'ollama', // no PATH
       join(process.env.LOCALAPPDATA ?? '', 'Programs', 'Ollama', 'ollama.exe'),
-      'D:\\Ollama\\app\\ollama.exe',
+      join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Ollama', 'ollama.exe'),
     ];
 
     const tryNext = (i: number): void => {
