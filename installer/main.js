@@ -1,4 +1,9 @@
 'use strict';
+// IMPORTANTE: o Electron trata arquivos .asar como PASTAS virtuais. Ao copiar o
+// NEXUS (que tem um resources/app.asar), isso faz o fs "entrar" no asar e quebrar
+// com ENOENT. Esta linha desliga esse comportamento — o .asar vira arquivo comum.
+process.noAsar = true;
+
 // Instalador próprio do NEXUS — janela preta e temática, sem a cara do Windows.
 // Instala POR USUÁRIO (%LOCALAPPDATA%\Programs\NEXUS), sem exigir administrador.
 const { app, BrowserWindow, ipcMain } = require('electron');
