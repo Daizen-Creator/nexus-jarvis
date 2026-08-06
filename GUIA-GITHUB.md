@@ -147,6 +147,35 @@ Nada de servidor próprio, nada de custo: o GitHub Releases é a "loja" de updat
 
 ---
 
+## Gerar o instalador personalizado (.exe)
+
+O NEXUS tem um instalador com tema próprio (arte em `build/`, cores e textos do
+Sistema). Para gerá-lo:
+
+```bash
+npm run dist
+```
+
+O `.exe` sai em `release/NEXUS-Setup-1.0.0.exe`.
+
+### Se der erro "Cannot create symbolic link"
+
+O Windows bloqueia links simbólicos sem permissão. É **uma vez só** — escolha um:
+
+**Opção 1 (recomendada): ligar o Modo de Desenvolvedor**
+Configurações → Privacidade e segurança → Para desenvolvedores → **Modo de
+desenvolvedor: Ativado**. Depois rode `npm run dist` de novo.
+
+**Opção 2: rodar como administrador**
+Abra o PowerShell com botão direito → *Executar como administrador*, vá até
+`D:\jarvis` e rode `npm run dist`.
+
+Para regerar a arte do instalador (se quiser mudar):
+
+```bash
+powershell -File scripts\make-installer-assets.ps1
+```
+
 ## Erros comuns
 
 | Sintoma | Causa / solução |
