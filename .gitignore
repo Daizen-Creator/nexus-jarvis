@@ -21,3 +21,6 @@ __pycache__/
 
 # Modelo de voz Vosk — grande demais para o git; baixado por download_model.py
 python/models/
+
+installer/node_modules
+release-installer

@@ -35,5 +35,12 @@
     "directories": {
       "output": "../release-installer"
     }
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
   }
 }

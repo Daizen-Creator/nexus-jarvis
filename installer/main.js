@@ -83,17 +83,29 @@ function createShortcut(lnkPath, target) {
 }
 
 function writeUninstall(exe) {
-  // Desinstalador simples: apaga a pasta e a chave do registro.
+  // Desinstalador. Um .cmd não consegue apagar a pasta em que ele mesmo está
+  // rodando (o Windows a trava). Solução: na 1ª execução ele se copia para o
+  // %TEMP% e se relança de lá — aí sim consegue remover a pasta de instalação.
   const uninstaller = path.join(installDir, 'desinstalar.cmd');
   fs.writeFileSync(
     uninstaller,
     `@echo off\r\n` +
+      `setlocal\r\n` +
+      `rem Se ainda estou dentro da pasta do NEXUS, copio para o TEMP e relanço.\r\n` +
+      `if /i "%~dp0"=="${installDir}\\" (\r\n` +
+      `  copy /y "%~f0" "%TEMP%\\nexus_uninstall.cmd" >nul\r\n` +
+      `  start "" cmd /c "%TEMP%\\nexus_uninstall.cmd"\r\n` +
+      `  exit /b\r\n` +
+      `)\r\n` +
       `echo Desinstalando o NEXUS...\r\n` +
+      `rem Fecha o NEXUS se estiver aberto, senao os arquivos ficam travados.\r\n` +
+      `taskkill /f /im NEXUS.exe /t >nul 2>&1\r\n` +
+      `timeout /t 2 >nul\r\n` +
       `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NEXUS" /f >nul 2>&1\r\n` +
       `del "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\NEXUS.lnk" >nul 2>&1\r\n` +
       `del "%USERPROFILE%\\Desktop\\NEXUS.lnk" >nul 2>&1\r\n` +
-      `timeout /t 1 >nul\r\n` +
-      `rmdir /s /q "${installDir}"\r\n`,
+      `rmdir /s /q "${installDir}"\r\n` +
+      `del "%~f0" >nul 2>&1\r\n`,
     'utf8',
   );
   const key = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NEXUS';
