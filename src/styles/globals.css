@@ -1,0 +1,501 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================== */
+/* Tokens de tema — trocados de uma vez pelo atributo data-theme        */
+/* ================================================================== */
+
+:root,
+[data-theme='blue'] {
+  --c-bg: 5 5 8;
+  --c-surface: 10 10 15;
+  --c-blue: 0 212 255;
+  --c-cyan: 125 249 255;
+  --c-ice: 232 246 255;
+  --c-steel: 26 26 36;
+  --c-gold: 255 176 32;
+  --c-danger: 255 51 85;
+  --c-success: 60 231 150;
+  --c-violet: 168 120 255;
+
+  --glow-soft: 0 0 8px rgb(var(--c-blue) / 0.5);
+  --glow-hard: 0 0 4px rgb(var(--c-cyan) / 0.9), 0 0 16px rgb(var(--c-blue) / 0.55);
+  --ease-nexus: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/*
+ * Os demais temas (dezenas) são aplicados por JS, escrevendo as variáveis
+ * `--c-*` direto em <html> — ver engine/themes.ts. O bloco :root acima é só o
+ * padrão para a primeira pintura, antes do React montar.
+ */
+
+/* ================================================================== */
+/* Base                                                                */
+/* ================================================================== */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    background: rgb(var(--c-bg));
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: rgb(var(--c-bg));
+    color: rgb(var(--c-ice));
+    font-family: 'Share Tech Mono', Consolas, monospace;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  button,
+  .font-display {
+    font-family: 'Orbitron', Impact, system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: rgb(var(--c-blue) / 0.35);
+    color: rgb(var(--c-ice));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-cyan));
+    outline-offset: 2px;
+  }
+
+  input,
+  button {
+    font-family: inherit;
+    color: inherit;
+  }
+
+  input::placeholder {
+    color: rgb(var(--c-ice) / 0.28);
+  }
+
+  /* Scrollbar do terminal */
+  .nx-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .nx-scroll::-webkit-scrollbar-track {
+    background: rgb(var(--c-blue) / 0.05);
+  }
+  .nx-scroll::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-blue) / 0.35);
+  }
+  .nx-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--c-blue) / 0.35) transparent;
+  }
+}
+
+/* ================================================================== */
+/* Componentes                                                         */
+/* ================================================================== */
+
+@layer components {
+  /* Cantos recortados — a assinatura visual das janelas do Sistema */
+  .nx-clip {
+    clip-path: polygon(
+      14px 0,
+      100% 0,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      0 100%,
+      0 14px
+    );
+  }
+
+  .nx-clip-sm {
+    clip-path: polygon(
+      8px 0,
+      100% 0,
+      100% calc(100% - 8px),
+      calc(100% - 8px) 100%,
+      0 100%,
+      0 8px
+    );
+  }
+
+  .nx-clip-btn {
+    clip-path: polygon(
+      10px 0,
+      100% 0,
+      100% calc(100% - 10px),
+      calc(100% - 10px) 100%,
+      0 100%,
+      0 10px
+    );
+  }
+
+  /* Janela base do Sistema: borda dupla + glow interno e externo */
+  .nx-window {
+    position: relative;
+    background: rgb(var(--c-surface) / 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgb(var(--c-blue) / 0.55);
+    box-shadow:
+      0 0 0 1px rgb(var(--c-blue) / 0.12),
+      0 0 18px rgb(var(--c-blue) / 0.28),
+      inset 0 0 26px rgb(var(--c-blue) / 0.08);
+  }
+
+  /* A segunda linha da borda dupla */
+  .nx-window::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgb(var(--c-blue) / 0.22);
+    pointer-events: none;
+  }
+
+  .nx-window--alert {
+    border-color: rgb(var(--c-danger) / 0.7);
+    box-shadow:
+      0 0 0 1px rgb(var(--c-danger) / 0.16),
+      0 0 24px rgb(var(--c-danger) / 0.38),
+      inset 0 0 26px rgb(var(--c-danger) / 0.1);
+  }
+  .nx-window--alert::before {
+    border-color: rgb(var(--c-danger) / 0.28);
+  }
+
+  .nx-window--gold {
+    border-color: rgb(var(--c-gold) / 0.8);
+    box-shadow:
+      0 0 0 1px rgb(var(--c-gold) / 0.2),
+      0 0 34px rgb(var(--c-gold) / 0.45),
+      inset 0 0 30px rgb(var(--c-gold) / 0.14);
+  }
+  .nx-window--gold::before {
+    border-color: rgb(var(--c-gold) / 0.3);
+  }
+
+  /* Painel do HUD — mais leve que a janela */
+  .nx-panel {
+    position: relative;
+    background: linear-gradient(
+      160deg,
+      rgb(var(--c-surface) / 0.72),
+      rgb(var(--c-bg) / 0.62)
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgb(var(--c-blue) / 0.3);
+    box-shadow:
+      0 0 14px rgb(var(--c-blue) / 0.14),
+      inset 0 0 20px rgb(var(--c-blue) / 0.05);
+  }
+
+  /* Barra de título diagonal */
+  .nx-titlebar {
+    background: linear-gradient(
+      100deg,
+      rgb(var(--c-blue) / 0.3) 0%,
+      rgb(var(--c-blue) / 0.1) 55%,
+      transparent 100%
+    );
+    border-bottom: 1px solid rgb(var(--c-blue) / 0.28);
+  }
+
+  .nx-btn {
+    position: relative;
+    padding: 0.6rem 1.4rem;
+    min-height: 44px;
+    letter-spacing: 0.22em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgb(var(--c-cyan));
+    border: 1px solid rgb(var(--c-blue) / 0.6);
+    background: rgb(var(--c-blue) / 0.07);
+    transition: all 240ms var(--ease-nexus);
+    text-shadow: var(--glow-soft);
+  }
+
+  .nx-btn:hover:not(:disabled),
+  .nx-btn:focus-visible:not(:disabled) {
+    background: rgb(var(--c-blue) / 0.2);
+    color: rgb(var(--c-ice));
+    box-shadow:
+      0 0 14px rgb(var(--c-blue) / 0.5),
+      inset 0 0 18px rgb(var(--c-blue) / 0.18);
+  }
+
+  .nx-btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .nx-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .nx-btn--ghost {
+    color: rgb(var(--c-ice) / 0.6);
+    border-color: rgb(var(--c-ice) / 0.22);
+    background: transparent;
+  }
+  .nx-btn--ghost:hover:not(:disabled) {
+    color: rgb(var(--c-danger));
+    border-color: rgb(var(--c-danger) / 0.6);
+    background: rgb(var(--c-danger) / 0.1);
+    box-shadow: 0 0 14px rgb(var(--c-danger) / 0.35);
+  }
+
+  .nx-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.55rem 0.8rem;
+    background: rgb(var(--c-bg) / 0.7);
+    border: 1px solid rgb(var(--c-blue) / 0.28);
+    color: rgb(var(--c-ice));
+    letter-spacing: 0.08em;
+    transition: all 240ms var(--ease-nexus);
+  }
+
+  .nx-input:focus {
+    outline: none;
+    border-color: rgb(var(--c-cyan));
+    box-shadow:
+      0 0 12px rgb(var(--c-blue) / 0.4),
+      inset 0 0 12px rgb(var(--c-blue) / 0.12);
+  }
+
+  .nx-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgb(var(--c-blue) / 0.75);
+  }
+
+  /* Trilho e preenchimento das barras */
+  .nx-bar {
+    position: relative;
+    height: 8px;
+    background: rgb(var(--c-ice) / 0.06);
+    border: 1px solid rgb(var(--c-blue) / 0.2);
+    overflow: hidden;
+  }
+
+  .nx-bar__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+  }
+
+  /* Brilho correndo por dentro da barra de XP */
+  .nx-bar__shine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 34%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.55),
+      transparent
+    );
+  }
+
+  .nx-glow {
+    text-shadow: var(--glow-hard);
+  }
+
+  /* Aberração cromática discreta nos títulos */
+  .nx-chroma {
+    text-shadow:
+      -0.6px 0 rgb(var(--c-danger) / 0.45),
+      0.6px 0 rgb(var(--c-cyan) / 0.45),
+      0 0 12px rgb(var(--c-blue) / 0.5);
+  }
+}
+
+/* ================================================================== */
+/* Overlays globais: scanlines, grain, vinheta                          */
+/* ================================================================== */
+
+@layer utilities {
+  .nx-scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0) 0px,
+      rgb(0 0 0 / 0) 2px,
+      rgb(0 0 0 / 0.28) 3px,
+      rgb(0 0 0 / 0.28) 4px
+    );
+    mix-blend-mode: multiply;
+    z-index: 90;
+  }
+
+  .nx-vignette::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 40%,
+      rgb(0 0 0 / 0.55) 100%
+    );
+    z-index: 89;
+  }
+
+  .nx-grain {
+    position: fixed;
+    inset: -50%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 91;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    animation: nx-grain-shift 700ms steps(3) infinite;
+  }
+
+  .nx-text-shadow-none {
+    text-shadow: none;
+  }
+
+  /* Janela sem moldura: região arrastável e exceções clicáveis */
+  .nx-drag {
+    -webkit-app-region: drag;
+  }
+  .nx-no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
+
+@keyframes nx-grain-shift {
+  0% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(-3%, 2%);
+  }
+  66% {
+    transform: translate(2%, -3%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Glitch curto usado no login e no ACESSO NEGADO */
+@keyframes nx-glitch {
+  0%,
+  100% {
+    transform: translate(0);
+    filter: none;
+  }
+  20% {
+    transform: translate(-3px, 1px);
+    filter: hue-rotate(24deg);
+  }
+  40% {
+    transform: translate(3px, -1px);
+  }
+  60% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(-18deg);
+  }
+  80% {
+    transform: translate(2px, 2px);
+  }
+}
+
+.nx-glitch {
+  animation: nx-glitch 320ms steps(2) 1;
+}
+
+@keyframes nx-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-12px);
+  }
+  30% {
+    transform: translateX(11px);
+  }
+  45% {
+    transform: translateX(-8px);
+  }
+  60% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+
+.nx-shake {
+  animation: nx-shake 420ms var(--ease-nexus) 1;
+}
+
+/* Scanline vertical da sequência de boot */
+@keyframes nx-scan-down {
+  from {
+    transform: translateY(-10vh);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+.nx-scan-down {
+  animation: nx-scan-down 2.2s linear infinite;
+}
+
+/* ================================================================== */
+/* Acessibilidade — desliga partículas, glitch e scanlines             */
+/* ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .nx-scanlines::after,
+  .nx-grain {
+    display: none !important;
+  }
+
+  .nx-glitch,
+  .nx-shake,
+  .nx-scan-down {
+    animation: none !important;
+  }
+}

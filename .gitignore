@@ -1,0 +1,23 @@
+node_modules
+dist
+dist-electron
+dist-ssr
+release
+.vite
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Python (script auxiliar)
+__pycache__/
+*.pyc
+
+# Modelo de voz Vosk — grande demais para o git; baixado por download_model.py
+python/models/
