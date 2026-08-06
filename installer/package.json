@@ -1,0 +1,39 @@
+{
+  "name": "nexus-installer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Instalador próprio do NEXUS — janela preta e temática (não a do Windows).",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.nexus.installer",
+    "productName": "NEXUS Installer",
+    "files": [
+      "main.js",
+      "preload.js",
+      "ui.html"
+    ],
+    "extraResources": [
+      {
+        "from": "../release/win-unpacked",
+        "to": "app-payload",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "../build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "NEXUS-Installer-${version}.exe"
+    },
+    "directories": {
+      "output": "../release-installer"
+    }
+  }
+}

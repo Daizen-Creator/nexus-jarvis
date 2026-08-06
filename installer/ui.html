@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #050508;
+        --blue: #00d4ff;
+        --cyan: #7df9ff;
+        --ice: #e8f6ff;
+        --gold: #ffb020;
+      }
+      html, body { height: 100%; }
+      body {
+        background:
+          radial-gradient(ellipse at 50% 40%, rgba(0, 212, 255, 0.08), transparent 60%),
+          #050508;
+        color: var(--ice);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        overflow: hidden;
+        user-select: none;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      /* barra de título arrastável, sem a do Windows */
+      .titlebar {
+        -webkit-app-region: drag;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      }
+      .titlebar .dot { width: 7px; height: 7px; background: var(--cyan); transform: rotate(45deg); box-shadow: 0 0 8px var(--cyan); }
+      .titlebar .name { font-weight: 800; letter-spacing: 0.3em; color: var(--cyan); font-size: 11px; }
+      .titlebar .sub { font-family: monospace; font-size: 9px; letter-spacing: 0.2em; color: rgba(232, 246, 255, 0.3); }
+      .win-btns { -webkit-app-region: no-drag; margin-left: auto; display: flex; gap: 2px; }
+      .win-btns button {
+        width: 34px; height: 26px; background: none; border: none; color: rgba(232, 246, 255, 0.5);
+        cursor: pointer; font-size: 13px;
+      }
+      .win-btns button:hover { background: rgba(0, 212, 255, 0.12); color: var(--cyan); }
+      .win-btns .close:hover { background: rgba(255, 51, 85, 0.2); color: #ff3355; }
+
+      main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
+
+      .reactor { width: 150px; height: 150px; }
+      .reactor .spin { transform-origin: 100px 100px; animation: spin 22s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .reactor .core { filter: drop-shadow(0 0 10px var(--cyan)); }
+
+      h1 { font-size: 26px; font-weight: 900; letter-spacing: 0.28em; color: var(--ice); margin-top: 14px; text-shadow: 0 0 16px rgba(0, 212, 255, 0.5); }
+      .tag { font-family: monospace; font-size: 11px; letter-spacing: 0.3em; color: var(--blue); margin-top: 4px; }
+      .msg { font-family: monospace; font-size: 12px; color: rgba(232, 246, 255, 0.55); margin-top: 26px; min-height: 18px; text-align: center; }
+
+      /* barra de progresso temática */
+      .bar { width: 380px; height: 6px; margin-top: 12px; background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.25); position: relative; overflow: hidden; }
+      .bar .fill { position: absolute; inset: 0 100% 0 0; background: linear-gradient(90deg, var(--blue), var(--cyan)); box-shadow: 0 0 12px var(--blue); transition: right 0.25s ease; }
+      .pct { font-family: monospace; font-size: 11px; color: var(--cyan); margin-top: 6px; }
+
+      .actions { margin-top: 28px; display: flex; gap: 12px; }
+      button.cta {
+        min-width: 150px; padding: 11px 22px; background: rgba(0, 212, 255, 0.08);
+        border: 1px solid rgba(0, 212, 255, 0.6); color: var(--cyan); font-weight: 700;
+        letter-spacing: 0.18em; font-size: 12px; cursor: pointer; transition: all 0.2s;
+        clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      }
+      button.cta:hover { background: rgba(0, 212, 255, 0.2); color: var(--ice); box-shadow: 0 0 16px rgba(0, 212, 255, 0.4); }
+      button.ghost { border-color: rgba(232, 246, 255, 0.25); color: rgba(232, 246, 255, 0.6); }
+      button.ghost:hover { border-color: rgba(255, 51, 85, 0.5); color: #ff3355; background: rgba(255, 51, 85, 0.08); box-shadow: none; }
+      .hidden { display: none !important; }
+
+      .footer { font-family: monospace; font-size: 9px; letter-spacing: 0.3em; color: rgba(232, 246, 255, 0.2); text-align: center; padding: 8px; border-top: 1px solid rgba(0, 212, 255, 0.12); }
+
+      /* scanlines sutis */
+      body::after {
+        content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 99;
+        background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.22) 3px 4px);
+        mix-blend-mode: multiply;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="titlebar">
+      <span class="dot"></span>
+      <span class="name">NEXUS</span>
+      <span class="sub">// INSTALADOR</span>
+      <div class="win-btns">
+        <button id="min">—</button>
+        <button class="close" id="close">✕</button>
+      </div>
+    </div>
+
+    <main>
+      <svg class="reactor" viewBox="0 0 200 200">
+        <g class="spin">
+          <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(0,212,255,0.15)" stroke-width="1" />
+          <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(0,212,255,0.25)" stroke-width="1" />
+          <script>/* ticks desenhados abaixo via JS */</script>
+          <g id="ticks"></g>
+        </g>
+        <g class="core">
+          <polygon points="100,62 130,120 70,120" fill="rgba(125,249,255,0.12)" stroke="var(--cyan)" stroke-width="2" />
+          <circle cx="100" cy="100" r="7" fill="var(--ice)" />
+        </g>
+      </svg>
+
+      <h1>NEXUS</h1>
+      <div class="tag">J.A.R.V.I.S. × SISTEMA</div>
+
+      <div class="msg" id="msg">Pronto para instalar na sua máquina.</div>
+
+      <div class="bar hidden" id="barWrap"><div class="fill" id="fill"></div></div>
+      <div class="pct hidden" id="pct">0%</div>
+
+      <div class="actions" id="actionsInstall">
+        <button class="cta" id="installBtn">INSTALAR</button>
+        <button class="cta ghost" id="cancelBtn">CANCELAR</button>
+      </div>
+
+      <div class="actions hidden" id="actionsDone">
+        <button class="cta" id="launchBtn">ABRIR O NEXUS</button>
+        <button class="cta ghost" id="doneBtn">FECHAR</button>
+      </div>
+    </main>
+
+    <div class="footer" id="footer">NEXUS 1.0.0 — INSTALAÇÃO POR USUÁRIO</div>
+
+    <script>
+      // desenha as marcações giratórias do reator
+      const ticks = document.getElementById('ticks');
+      for (let i = 0; i < 60; i++) {
+        const a = (i / 60) * Math.PI * 2;
+        const long = i % 5 === 0;
+        const r1 = long ? 78 : 82, r2 = 86;
+        const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l.setAttribute('x1', 100 + Math.cos(a) * r1); l.setAttribute('y1', 100 + Math.sin(a) * r1);
+        l.setAttribute('x2', 100 + Math.cos(a) * r2); l.setAttribute('y2', 100 + Math.sin(a) * r2);
+        l.setAttribute('stroke', 'rgba(0,212,255,' + (long ? 0.5 : 0.2) + ')');
+        l.setAttribute('stroke-width', long ? 1.4 : 0.8);
+        ticks.appendChild(l);
+      }
+
+      const $ = (id) => document.getElementById(id);
+      let installedExe = null;
+
+      document.getElementById('min').onclick = () => window.installer.minimize();
+      document.getElementById('close').onclick = () => window.installer.close();
+      $('cancelBtn').onclick = () => window.installer.close();
+      $('doneBtn').onclick = () => window.installer.close();
+      $('launchBtn').onclick = () => window.installer.launch(installedExe);
+
+      window.installer.onProgress((p) => {
+        $('msg').textContent = p.msg || '';
+        if (typeof p.pct === 'number') {
+          $('fill').style.right = (100 - p.pct) + '%';
+          $('pct').textContent = p.pct + '%';
+        }
+        if (p.status === 'done') {
+          installedExe = p.exe;
+          $('actionsInstall').classList.add('hidden');
+          $('actionsDone').classList.remove('hidden');
+          $('msg').style.color = 'var(--cyan)';
+        }
+        if (p.status === 'error') {
+          $('msg').style.color = '#ff3355';
+          $('installBtn').disabled = false;
+          $('installBtn').textContent = 'TENTAR DE NOVO';
+        }
+      });
+
+      $('installBtn').onclick = async () => {
+        $('installBtn').disabled = true;
+        $('cancelBtn').classList.add('hidden');
+        $('barWrap').classList.remove('hidden');
+        $('pct').classList.remove('hidden');
+        await window.installer.install();
+      };
+    </script>
+  </body>
+</html>
