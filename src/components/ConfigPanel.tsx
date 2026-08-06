@@ -302,6 +302,19 @@ function VoiceSection({ config, update }: SectionProps): JSX.Element {
         </div>
 
         <div className="mt-3 space-y-3">
+          <Field label={`Velocidade da fala: ${config.voice.voiceRate.toFixed(2)}×`} hint="Mais alto = fala mais rápido.">
+            <input type="range" min={0.7} max={1.6} step={0.02} value={config.voice.voiceRate}
+              onChange={(e) => update((d) => ({ ...d, voice: { ...d.voice, voiceRate: Number(e.target.value) } }))}
+              className="w-full accent-cyan" />
+          </Field>
+          <Field label={`Tom da voz: ${config.voice.voicePitch.toFixed(2)}`} hint="1.0 é o natural. Longe disso soa mais robótico.">
+            <input type="range" min={0.6} max={1.5} step={0.02} value={config.voice.voicePitch}
+              onChange={(e) => update((d) => ({ ...d, voice: { ...d.voice, voicePitch: Number(e.target.value) } }))}
+              className="w-full accent-cyan" />
+          </Field>
+        </div>
+
+        <div className="mt-3 space-y-3">
           <Field
             label="Palavras de ativação"
             hint='Separe por vírgula. "sistema" é a mais confiável no modelo pt-BR; "jarvis" não existe no vocabulário e sai como "já vos" — o casamento fuzzy cobre as variantes.'

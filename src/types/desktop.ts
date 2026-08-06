@@ -108,6 +108,10 @@ export interface VoiceConfig {
   speakResponses: boolean;
   /** Gênero da voz sintetizada. A persona feminina é a padrão. */
   voiceGender: 'female' | 'male';
+  /** Velocidade da fala (0.5 lento … 2 rápido). */
+  voiceRate: number;
+  /** Tom da voz (0.5 grave … 2 agudo). */
+  voicePitch: number;
 }
 
 export interface BehaviorConfig {

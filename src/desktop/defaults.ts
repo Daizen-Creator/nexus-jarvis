@@ -72,6 +72,10 @@ export const defaultConfig = (): NexusConfig => ({
     minConfidence: 0.45,
     speakResponses: true,
     voiceGender: 'female',
+    // Mais rápido e tom natural — as vozes offline do Windows soam robóticas
+    // quando lentas ou com pitch alterado.
+    voiceRate: 1.18,
+    voicePitch: 1.0,
   },
   behavior: {
     autostart: false,

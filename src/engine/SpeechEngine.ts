@@ -15,6 +15,8 @@ class SpeechEngine {
   /** Transformação aplicada a todo texto antes de falar (ver personalize.ts). */
   private transform: ((text: string) => string) | null = null;
   private gender: 'female' | 'male' = 'female';
+  private rate = 1.18;
+  private pitch = 1.0;
 
   readonly supported: boolean =
     typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -34,6 +36,12 @@ class SpeechEngine {
     if (this.gender === gender) return;
     this.gender = gender;
     this.pickVoice();
+  }
+
+  /** Ajusta velocidade e tom (vindos da configuração). */
+  setTuning(rate: number, pitch: number): void {
+    this.rate = Math.max(0.5, Math.min(2, rate));
+    this.pitch = Math.max(0.5, Math.min(2, pitch));
   }
 
   private pickVoice(): void {
@@ -121,9 +129,8 @@ class SpeechEngine {
     const utter = new SpeechSynthesisUtterance(text);
     if (this.voice) utter.voice = this.voice;
     utter.lang = this.voice?.lang ?? 'pt-BR';
-    // Voz feminina soa melhor um pouco mais aguda; a masculina, mais grave.
-    utter.pitch = this.gender === 'female' ? 1.08 : 0.8;
-    utter.rate = 1.05;
+    utter.pitch = this.pitch;
+    utter.rate = this.rate;
     utter.volume = 1;
 
     const finish = (): void => {
