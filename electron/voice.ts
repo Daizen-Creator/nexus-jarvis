@@ -321,6 +321,7 @@ export const listMicDevices = (): Promise<MicDevice[]> =>
 
 export const downloadModel = (
   onProgress: (pct: number) => void,
+  large = false,
 ): Promise<{ ok: boolean; message: string }> =>
   new Promise((resolve) => {
     const python = findPython();
@@ -329,7 +330,9 @@ export const downloadModel = (
       return;
     }
 
-    const child = spawn(python, [scriptPath('download_model.py')], {
+    const args = [scriptPath('download_model.py')];
+    if (large) args.push('--large'); // modelo grande (~1,5 GB, bem mais preciso)
+    const child = spawn(python, args, {
       cwd: pythonDir(),
       windowsHide: true,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUNBUFFERED: '1' },

@@ -4,6 +4,7 @@ import { SystemWindow, Panel } from './SystemWindow';
 import { useSound } from '../hooks/useSound';
 import { useConfigStore } from '../store/useConfigStore';
 import { useSystemStore } from '../store/useSystemStore';
+import { speech } from '../engine/SpeechEngine';
 import { THEMES, themeById } from '../engine/themes';
 import { sphereController } from '../hooks/useSphere';
 import { SECURITY_TOOLS, SPHERE_PRESETS, presetTheme, sphereFromPreset } from '../desktop/defaults';
@@ -293,12 +294,44 @@ function VoiceSection({ config, update }: SectionProps): JSX.Element {
           />
           <Toggle
             label="Voz feminina"
-            hint="A persona feminina é a padrão. Desligue para uma voz masculina."
+            hint="Usada quando 'Voz específica' está em Automática."
             checked={config.voice.voiceGender === 'female'}
             onChange={(v) =>
               update((d) => ({ ...d, voice: { ...d.voice, voiceGender: v ? 'female' : 'male' } }))
             }
           />
+        </div>
+
+        <div className="mt-3 space-y-2">
+          <Field
+            label="Voz específica"
+            hint="Escolha uma voz instalada. Instale mais em Windows → Hora e idioma → Fala."
+          >
+            <select
+              className={inputClass}
+              value={config.voice.voiceName}
+              onChange={(e) => update((d) => ({ ...d, voice: { ...d.voice, voiceName: e.target.value } }))}
+            >
+              <option value="">Automática (por gênero)</option>
+              {speech.listVoices().map((v) => (
+                <option key={v.name} value={v.name}>
+                  {v.female ? '♀' : '♂'} {v.name} ({v.lang})
+                </option>
+              ))}
+            </select>
+          </Field>
+          <button
+            type="button"
+            className="nx-btn nx-clip-btn w-full !text-[0.6rem]"
+            onClick={() => {
+              speech.setVoiceName(config.voice.voiceName);
+              speech.setGender(config.voice.voiceGender);
+              speech.setTuning(config.voice.voiceRate, config.voice.voicePitch);
+              speech.speak('Olá, Senhor. É assim que a minha voz soa.');
+            }}
+          >
+            OUVIR ESTA VOZ
+          </button>
         </div>
 
         <div className="mt-3 space-y-3">
@@ -451,7 +484,7 @@ function VoiceSection({ config, update }: SectionProps): JSX.Element {
                   disabled={!bridge || progress !== null}
                   onClick={() => {
                     setProgress(0);
-                    void bridge?.downloadModel().then((r) => {
+                    void bridge?.downloadModel(false).then((r) => {
                       setProgress(null);
                       if (r.ok) refresh();
                     });
@@ -461,6 +494,29 @@ function VoiceSection({ config, update }: SectionProps): JSX.Element {
                 </button>
               </>
             )}
+
+            {/* Modelo grande: bem mais preciso para quem não é entendido direito.
+                Disponível mesmo com o pequeno já instalado — troca por upgrade. */}
+            <p className="mt-3 font-mono text-[0.62rem] text-ice/45">
+              Não está te entendendo direito? Baixe o modelo grande (~1,5 GB) —
+              precisão muito maior. Precisa de espaço em disco e uma boa conexão.
+            </p>
+            <button
+              type="button"
+              className="nx-btn nx-clip-btn mt-2 w-full !text-[0.6rem]"
+              disabled={!bridge || progress !== null}
+              onClick={() => {
+                setProgress(0);
+                void bridge?.downloadModel(true).then((r) => {
+                  setProgress(null);
+                  if (r.ok) refresh();
+                });
+              }}
+            >
+              {progress !== null
+                ? `BAIXANDO ${progress.toFixed(0)}%`
+                : 'BAIXAR MODELO GRANDE (MELHOR PRECISÃO)'}
+            </button>
           </div>
 
           {state ? (

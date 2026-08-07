@@ -1,6 +1,6 @@
 {
   "name": "nexus-installer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Instalador próprio do NEXUS — janela preta e temática (não a do Windows).",
   "main": "main.js",

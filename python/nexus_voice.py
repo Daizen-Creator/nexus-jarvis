@@ -71,10 +71,15 @@ def find_model(explicit: str | None) -> Path | None:
 
     if not DEFAULT_MODEL_DIR.is_dir():
         return None
-    for child in sorted(DEFAULT_MODEL_DIR.iterdir()):
-        if is_vosk_model(child):
+    found = [child for child in sorted(DEFAULT_MODEL_DIR.iterdir()) if is_vosk_model(child)]
+    if not found:
+        return None
+    # Prefere o modelo grande (mais preciso) quando os dois estão instalados:
+    # os "small" trazem "small" no nome; qualquer outro é o modelo completo.
+    for child in found:
+        if "small" not in child.name.lower():
             return child
-    return None
+    return found[0]
 
 
 def list_devices() -> int:

@@ -1,7 +1,7 @@
 {
   "name": "nexus",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist-electron/electron/main.js",
   "description": "NEXUS — interface J.A.R.V.I.S. x Sistema (Solo Leveling), com assistente de voz offline em segundo plano.",

@@ -173,12 +173,14 @@ export default function App(): JSX.Element {
 
   // Persona: aplica o gênero de voz configurado (feminina por padrão).
   const voiceGender = useConfigStore((s) => s.config.voice.voiceGender);
+  const voiceName = useConfigStore((s) => s.config.voice.voiceName);
   const voiceRate = useConfigStore((s) => s.config.voice.voiceRate);
   const voicePitch = useConfigStore((s) => s.config.voice.voicePitch);
   useEffect(() => {
     speech.setGender(voiceGender);
+    speech.setVoiceName(voiceName);
     speech.setTuning(voiceRate, voicePitch);
-  }, [voiceGender, voiceRate, voicePitch]);
+  }, [voiceGender, voiceName, voiceRate, voicePitch]);
 
   // Aparência da esfera (preset + ajustes) vinda da configuração.
   const sphereDesign = useConfigStore((s) => s.config.sphere);

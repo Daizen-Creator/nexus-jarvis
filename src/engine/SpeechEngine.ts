@@ -15,6 +15,7 @@ class SpeechEngine {
   /** Transformação aplicada a todo texto antes de falar (ver personalize.ts). */
   private transform: ((text: string) => string) | null = null;
   private gender: 'female' | 'male' = 'female';
+  private preferredName = '';
   private rate = 1.18;
   private pitch = 1.0;
 
@@ -38,6 +39,28 @@ class SpeechEngine {
     this.pickVoice();
   }
 
+  /** Escolhe uma voz específica pelo nome. Vazio volta à escolha por gênero. */
+  setVoiceName(name: string): void {
+    if (this.preferredName === name) return;
+    this.preferredName = name;
+    this.pickVoice();
+  }
+
+  /** Lista as vozes utilizáveis (pt e en) para o seletor da configuração. */
+  listVoices(): Array<{ name: string; lang: string; female: boolean }> {
+    if (!this.supported) return [];
+    const female = /(maria|heloisa|hel[óo]isa|francisca|luciana|female|mulher|feminin|zira|helena|sabina|paulina|catarina)/i;
+    return window.speechSynthesis
+      .getVoices()
+      .filter((v) => /^(pt|en|es)/i.test(v.lang))
+      .map((v) => ({ name: v.name, lang: v.lang, female: female.test(v.name) }))
+      .sort((a, b) => {
+        // pt-BR primeiro, depois pt, depois o resto.
+        const rank = (l: string): number => (/pt.?br/i.test(l) ? 0 : /^pt/i.test(l) ? 1 : 2);
+        return rank(a.lang) - rank(b.lang) || a.name.localeCompare(b.name);
+      });
+  }
+
   /** Ajusta velocidade e tom (vindos da configuração). */
   setTuning(rate: number, pitch: number): void {
     this.rate = Math.max(0.5, Math.min(2, rate));
@@ -48,6 +71,15 @@ class SpeechEngine {
     if (!this.supported) return;
     const voices = window.speechSynthesis.getVoices();
     if (voices.length === 0) return;
+
+    // Voz escolhida pelo nome tem prioridade sobre o gênero automático.
+    if (this.preferredName) {
+      const exact = voices.find((v) => v.name === this.preferredName);
+      if (exact) {
+        this.voice = exact;
+        return;
+      }
+    }
 
     const femalePatterns = /(maria|heloisa|hel[óo]isa|francisca|luciana|female|mulher|feminin|f[eê]mea|google portugu[êe]s do brasil|zira|helena|sabina)/i;
     const malePatterns = /(daniel|ricardo|felipe|thiago|male|homem|masculin|antonio|jorge)/i;

@@ -304,8 +304,8 @@ const registerIpc = (): void => {
   ipcMain.handle('voice:state', () => voice.getState());
   ipcMain.handle('voice:devices', () => listMicDevices());
   ipcMain.handle('voice:check-model', () => checkModel());
-  ipcMain.handle('voice:download-model', () =>
-    downloadModel((pct) => broadcast('model:progress', pct)),
+  ipcMain.handle('voice:download-model', (_e, large?: boolean) =>
+    downloadModel((pct) => broadcast('model:progress', pct), large === true),
   );
 
   ipcMain.handle('action:run', (_e, action: NexusAction) => runAction(action));

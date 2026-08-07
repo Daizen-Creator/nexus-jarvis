@@ -69,9 +69,13 @@ export const defaultConfig = (): NexusConfig => ({
     requireWakeWord: false,
     deviceIndex: null,
     modelPath: null,
-    minConfidence: 0.45,
+    // Mais baixo = deixa passar transcrições imperfeitas para o casamento fuzzy
+    // resolver, em vez de descartar. O modelo pequeno erra a confiança para
+    // baixo em frases corretas, então filtrar alto fazia "não entender".
+    minConfidence: 0.2,
     speakResponses: true,
     voiceGender: 'female',
+    voiceName: '',
     // Mais rápido e tom natural — as vozes offline do Windows soam robóticas
     // quando lentas ou com pitch alterado.
     voiceRate: 1.18,

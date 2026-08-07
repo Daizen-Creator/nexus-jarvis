@@ -108,6 +108,8 @@ export interface VoiceConfig {
   speakResponses: boolean;
   /** Gênero da voz sintetizada. A persona feminina é a padrão. */
   voiceGender: 'female' | 'male';
+  /** Voz específica escolhida pelo nome. Vazio = escolha automática por gênero. */
+  voiceName: string;
   /** Velocidade da fala (0.5 lento … 2 rápido). */
   voiceRate: number;
   /** Tom da voz (0.5 grave … 2 agudo). */
@@ -401,7 +403,7 @@ export interface NexusBridge {
   getVoiceState: () => Promise<VoiceStatePayload>;
   listMicDevices: () => Promise<MicDevice[]>;
   checkModel: () => Promise<{ installed: boolean; path: string | null }>;
-  downloadModel: () => Promise<{ ok: boolean; message: string }>;
+  downloadModel: (large?: boolean) => Promise<{ ok: boolean; message: string }>;
 
   runAction: (action: NexusAction) => Promise<ActionResult>;
   pickExecutable: () => Promise<string | null>;

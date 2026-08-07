@@ -48,8 +48,8 @@ const bridge: NexusBridge = {
   listMicDevices: () => ipcRenderer.invoke('voice:devices') as Promise<MicDevice[]>,
   checkModel: () =>
     ipcRenderer.invoke('voice:check-model') as Promise<{ installed: boolean; path: string | null }>,
-  downloadModel: () =>
-    ipcRenderer.invoke('voice:download-model') as Promise<{ ok: boolean; message: string }>,
+  downloadModel: (large?: boolean) =>
+    ipcRenderer.invoke('voice:download-model', large) as Promise<{ ok: boolean; message: string }>,
 
   runAction: (action: NexusAction) => ipcRenderer.invoke('action:run', action) as Promise<ActionResult>,
   pickExecutable: () => ipcRenderer.invoke('dialog:pick-exe') as Promise<string | null>,
