@@ -21,6 +21,19 @@ export const bindUpdater = (emit: Emit): void => {
 
 export const appVersion = (): string => app.getVersion();
 
+/**
+ * Converte um erro do updater em estado. Quando falta o `app-update.yml` (build
+ * sem config de publicação) ou é rede indisponível, não é "falha" para o usuário
+ * — é só "auto-update indisponível". Nada de cartão de erro vermelho por isso.
+ */
+const fromError = (err: unknown): UpdatePayload => {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/app-update\.yml|ENOENT|dev-app-update|net::|ENOTFOUND|ECONNREFUSED|getaddrinfo/i.test(msg)) {
+    return { status: 'idle', version: app.getVersion(), message: 'Auto-update indisponível nesta instalação.' };
+  }
+  return { status: 'error', message: msg };
+};
+
 /** Carrega o electron-updater só quando empacotado, para não pesar o dev. */
 const loadAutoUpdater = async (): Promise<typeof import('electron-updater').autoUpdater | null> => {
   if (!app.isPackaged) return null;
@@ -57,7 +70,7 @@ export const initUpdater = async (): Promise<void> => {
   au.on('update-downloaded', (info) =>
     emitFn({ status: 'ready', version: info.version, message: `Versão ${info.version} pronta. Reinicie para instalar.` }),
   );
-  au.on('error', (err) => emitFn({ status: 'error', message: err.message }));
+  au.on('error', (err) => emitFn(fromError(err)));
 
   ready = true;
 
@@ -79,7 +92,7 @@ export const checkUpdate = async (): Promise<UpdatePayload> => {
     await autoUpdaterRef.checkForUpdates();
     return { status: 'checking' };
   } catch (error) {
-    const payload: UpdatePayload = { status: 'error', message: String(error) };
+    const payload = fromError(error);
     emitFn(payload);
     return payload;
   }
